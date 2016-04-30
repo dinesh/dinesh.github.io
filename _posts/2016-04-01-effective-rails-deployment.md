@@ -3,9 +3,6 @@ layout: post
 title: Effective Rails Deployment
 ---
 
-Effective Rails deployment
------------------------------
-
 [Capistrano](http://capistranorb.com/) has been an excellent tool for years to deploy simple or multi-stage complex applications to remote servers. However the rise of PASS like Heroku, Dokku, I got in mind to use some automatic orchestration framework.
 
 I looked over [Chef](https://www.chef.io/chef/), [Puppet](https://puppet.com/), [SaltStack](http://saltstack.com/) and [Ansible](https://www.ansible.com/) on a weekend and decided to go with ansible since it looked easiest to get hands dirty and have great documentation. After some initial hicups I was able to deploy some of our inhouse applications on EC2 and introduced it to my coworkers at [codecrux](http://codecrux.com).
