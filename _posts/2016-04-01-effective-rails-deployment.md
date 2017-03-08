@@ -17,24 +17,25 @@ Let's take an example to deploy [lobster.rs](https://github.com/jcs/lobsters). H
 
 First of all you need to define required variables in a yaml file for ansible to pick them up.
 
+{% highlight shell %}
 
-    ---
-    app_name: lobsters
-    rails_env: production
+  app_name: lobsters
+  rails_env: production
 
-    git_url: git@github.com:jcs/lobsters.git
-    git_version: master
+  git_url: git@github.com:jcs/lobsters.git
+  git_version: master
 
-    app_path: '/{{ app_name }}'
-    shared_path: '{{ app_path }}/shared'
-    releases_path: '{{ app_path }}/releases'
-    current_release_path: '{{ app_path }}/current'
-    app_public_path: "{{ current_release_path }}/public"
-    app_config_path: "{{ current_release_path }}/config"
-    app_temp_path: "{{ current_release_path }}/tmp"
-    app_logs_path: "{{ current_release_path }}/log"
+  app_path: '/{{ app_name }}'
+  shared_path: '{{ app_path }}/shared'
+  releases_path: '{{ app_path }}/releases'
+  current_release_path: '{{ app_path }}/current'
+  app_public_path: "{{ current_release_path }}/public"
+  app_config_path: "{{ current_release_path }}/config"
+  app_temp_path: "{{ current_release_path }}/tmp"
+  app_logs_path: "{{ current_release_path }}/log"
 
-    keep_releases: 5
+  keep_releases: 5
+{% endhighlight %}
 
 You should also define your remote host in ansible inventory/host file like
 
@@ -45,59 +46,62 @@ You should also define your remote host in ansible inventory/host file like
 
 Now when we have configuration we can create the actual playbook for doing capistrano-style deployments. Create `deploy.yml` file:
 
-    ---
-    - hosts: all
-      tasks:
-        - set_fact: this_release_ts={{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}
-        - set_fact: this_release_path={{ releases_path }}/{{ this_release_ts }}
+{% highlight shell %}
 
-        - debug: msg='New release path {{ this_release_path }}'
+---
+- hosts: all
+  tasks:
+    - set_fact: this_release_ts={{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}
+    - set_fact: this_release_path={{ releases_path }}/{{ this_release_ts }}
 
-        - name: Create new release dir
-          file: path={{ this_release_path }} state=directory
+    - debug: msg='New release path {{ this_release_path }}'
 
-        - name: Update code
-          git: repo={{ git_url }} dest={{ this_release_path }} version={{ git_version }} accept_hostkey=yes
-          register: git
+    - name: Create new release dir
+      file: path={{ this_release_path }} state=directory
 
-        - debug: msg='Updated repo from {{ git.before }} to {{ git.after }}'
+    - name: Update code
+      git: repo={{ git_url }} dest={{ this_release_path }} version={{ git_version }} accept_hostkey=yes
+      register: git
 
-        - name: Symlink shared files
-          file: src={{ shared_path }}/{{ item }} dest={{ this_release_path }}/{{ item }} state=link force=yes
-          with_items:
-            - config/database.yml
-            - config/secrets.yml
-            - config/unicorn.rb
-            - log
-            - tmp
-            - vendor/bundle
+    - debug: msg='Updated repo from {{ git.before }} to {{ git.after }}'
 
-        - name: Install bundle
-          command: 'bundle install --deployment --without="development test"'
-          args:
-            chdir: '{{ this_release_path }}'
+    - name: Symlink shared files
+      file: src={{ shared_path }}/{{ item }} dest={{ this_release_path }}/{{ item }} state=link force=yes
+      with_items:
+        - config/database.yml
+        - config/secrets.yml
+        - config/unicorn.rb
+        - log
+        - tmp
+        - vendor/bundle
 
-        - name: Precompile assets
-          command: rake assets:precompile chdir={{ this_release_path }}
-          environment:
-            RAILS_ENV: '{{ rails_env }}'
+    - name: Install bundle
+      command: 'bundle install --deployment --without="development test"'
+      args:
+        chdir: '{{ this_release_path }}'
 
-        - name: Migrate database
-          command: rake db:migrate chdir={{ this_release_path }}
-          environment:
-            RAILS_ENV: '{{ rails_env }}'
+    - name: Precompile assets
+      command: rake assets:precompile chdir={{ this_release_path }}
+      environment:
+        RAILS_ENV: '{{ rails_env }}'
 
-        - name: Symlink new release
-          file: src={{ this_release_path }} dest={{ current_release_path }} state=link force=yes
+    - name: Migrate database
+      command: rake db:migrate chdir={{ this_release_path }}
+      environment:
+        RAILS_ENV: '{{ rails_env }}'
 
-        - name: Restart unicorn
-          command: sudo restart {{ app_name }}
+    - name: Symlink new release
+      file: src={{ this_release_path }} dest={{ current_release_path }} state=link force=yes
 
-        - name: Cleanup
-          shell: "ls -1t {{ releases_path }}|tail -n +{{ keep_releases + 1 }}|xargs rm -rf"
-          args:
-            chdir: '{{ releases_path }}'
+    - name: Restart unicorn
+      command: sudo restart {{ app_name }}
 
+    - name: Cleanup
+      shell: "ls -1t {{ releases_path }}|tail -n +{{ keep_releases + 1 }}|xargs rm -rf"
+      args:
+        chdir: '{{ releases_path }}'
+
+{% endhighlight %}
 
 **Deploy**
 

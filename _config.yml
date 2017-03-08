@@ -1,25 +1,32 @@
 # Dependencies
-markdown:         kramdown
-highlighter:      rouge
+markdown: kramdown
+highlighter: rouge
 
 # Permalinks
-permalink:        pretty
+permalink: pretty
 
 # Setup
-title:            Dinesh Yadav
-tageline:         'blog'
-description:      'My daily sprinkles on life and technology'
-url:              http://dinesh.github.io
-baseurl:          https://dinesh.github.io/
+title: Dinesh Yadav
+tageline: blog
+description: My daily sprinkles on life and technology
+url: http://dinesh.github.io
+# baseurl: https://dinesh.github.io/
+baseurl: "/"
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
 
 author:
-  name:           'Dinesh Yadav'
-  url:            https://twitter.com/dinesh_oi
+  name: 'Dinesh Yadav'
+  url: https://twitter.com/dinesh_oi
 
-paginate:         5
+paginate: 5
+gems:
+  - jekyll-paginate
 
 # Custom vars
-version:          2.1.0
+version: 2.1.0
 
 github:
-  repo:           https://github.com/dinesh
+  repo: https://github.com/dinesh
