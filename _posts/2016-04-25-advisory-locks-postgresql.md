@@ -39,7 +39,7 @@ So how would we go about using this in Ruby?
 We can grab our ActiveRecord connection and call `#select_value` in order get back a `'t'` or `'f'` value. A simple equality check let's us know whether or not we have obtained the lock, and if we haven't we can choose to bail and exit the program.
 
 
-```
+{% highlight ruby %}
 class LockObtainer
   def lock_it_up
     exclusive do
@@ -71,7 +71,7 @@ class LockObtainer
     ActiveRecord::Base.connection
   end
 end
-```
+{% endhighlight %}
 
 
 Additional Information
